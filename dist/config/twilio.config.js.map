@@ -1,0 +1,1 @@
+{"version":3,"file":"twilio.config.js","sourceRoot":"","sources":["../../src/config/twilio.config.ts"],"names":[],"mappings":"AAAA,uBAAuB;AACvB,OAAO,MAAM,MAAM,QAAQ,CAAC;AAC5B,MAAM,CAAC,MAAM,EAAE,CAAC;AAChB,OAAO,MAAM,MAAM,QAAQ,CAAC;AAE5B,MAAM,MAAM,GAAG,IAAI,MAAM,CACvB,OAAO,CAAC,GAAG,CAAC,kBAAmB,EAC/B,OAAO,CAAC,GAAG,CAAC,iBAAkB,CAC/B,CAAC;AAEF,eAAe,MAAM,CAAC"}

@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+model Farmer {
+  id             String     @id @default(uuid())    // internal UUID
+  farmerId       String?     @unique                // generated farmer ID (like FARM12345)
+  mobileNumber   String     @unique
+  password       String?    
+  // Profile details (added later after verification)
+  fullName       String?
+  dob            DateTime?
+  aadhaarNumber  String?    @unique
+  address        String?
+
+  // States
+  
+  isVerified     Boolean    @default(false)   // true after OTP
+  isOTPverified     Boolean    @default(false)   // true after OTP
+  isComplete     Boolean    @default(false)   // true after profile filled
+
+  // Relations
+  landInfo       LandInfo[]
+  documents      Document[]
+  crops          Crop[]
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model LandInfo {
+  id             String   @id @default(uuid())
+  totalHectare   Float?
+  khasraNumber   String?
+  coordinates    Json?    // store GeoJSON or [{lat,lng}]
+
+  farmerId       String   @unique
+  farmer         Farmer   @relation(fields: [farmerId], references: [id])
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  type           DocumentType
+  url            String   // link to file in S3, GCS, etc.
+
+  farmerId       String
+  farmer         Farmer   @relation(fields: [farmerId], references: [id])
+}
+
+model Crop {
+  id             String   @id @default(uuid())
+  name           String
+
+  farmerId       String
+  farmer         Farmer   @relation(fields: [farmerId], references: [id])
+}
+
+enum DocumentType {
+  INCOME_CERTIFICATE
+  FARMER_PHOTOGRAPH
+  LAND_CERTIFICATE
+}
+
+model OTP {
+  id         String   @id @default(uuid())
+  mobile     String
+  otp        String
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+
+
+//Lab Related Data Here
+
+
+model Lab {
+  id            String        @id @default(cuid())
+  name          String
+  address       String
+  contactEmail  String
+  contactPhone  String
+  accreditation String?       // e.g. NABL, ISO, AYUSH
+  licenseNumber String?       // govt. license/reg number
+  isVerified    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  users         LabUser[]
+  tests         LabTest[]
+  certificates  LabCertificate[]
+}
+
+model LabUser {
+  id        String   @id @default(cuid())
+  labId     String
+  lab       Lab      @relation(fields: [labId], references: [id])
+  name      String
+  email     String   @unique
+  password  String  
+  role      String   
+  createdAt DateTime @default(now())
+}
+
+model LabTest {
+  id              String          @id @default(cuid())
+  labId           String
+  lab             Lab             @relation(fields: [labId], references: [id])
+  batchId         String
+  herbId          String
+  testDate        DateTime        @default(now())
+  parametersTested Json
+  resultSummary   String
+  status          String          
+  createdAt       DateTime        @default(now())
+
+  certificates    LabCertificate[]  
+}
+
+model LabCertificate {
+  id            String     @id @default(cuid())
+  labId         String
+  lab           Lab        @relation(fields: [labId], references: [id])
+  testId        String
+  test          LabTest    @relation(fields: [testId], references: [id])
+  certificateNo String     @unique
+  type          String     
+  issueDate     DateTime   @default(now())
+  expiryDate    DateTime?
+  fileUrl       String?
+  createdAt     DateTime   @default(now())
+}
+
+model Herb {
+  id            String   @id @default(cuid())
+  commonName    String
+  scientificName String
+  sanskritName  String?
+  description   String?
+  createdAt     DateTime @default(now())
+}

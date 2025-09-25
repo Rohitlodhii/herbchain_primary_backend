@@ -24,6 +24,21 @@ export const loginLabUser = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    const labId = user.labId;
+    
+    const isLabVerified = await db.lab.findUnique({
+        where : { id : labId},        
+    })
+   
+    if (!isLabVerified?.isVerified) {
+        return res.json({
+          message: "Lab not verified",
+          token: null,
+        });
+      }
+      
+
+
     let isAdmin = false;
     if( user.role === "ADMIN" ){
         isAdmin = true;
